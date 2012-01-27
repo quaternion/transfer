@@ -1,0 +1,8 @@
+*.gem
+.bundle
+.rvmrc
+.rspec
+.project
+Gemfile.lock
+pkg/*
+.yardoc/*
