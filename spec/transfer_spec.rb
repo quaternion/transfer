@@ -116,11 +116,12 @@ describe Transfer do
       end
     end
 
-    context "with Transfer.failure = lambda{|model|}" do
-      let!(:callback){ lambda{|m|} }
+    context "with Transfer.failure &block" do
       before do
         Transfer.configure do |c|
-          c.failure = callback
+          c.failure do |row|
+            self.dynamic_value = row[:fname]
+          end
         end
       end
 
@@ -134,20 +135,20 @@ describe Transfer do
           end
 
           it "should not called callback" do
-            dont_allow(callback).call
             do_action
+            model.dynamic_value.should be_nil
           end
 
           it "should called callback if #save raise exception" do
             instance_of(klass).save { raise "force exception!" }
-            stub(callback).call(model).once
             do_action
+            model.dynamic_value.should == "Johnny"
           end
 
           it "should called callback if #save return false" do
             instance_of(klass).save { false }
-            stub(callback).call(model).once
             do_action
+            model.dynamic_value.should == "Johnny"
           end
         end
       end

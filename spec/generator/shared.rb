@@ -39,9 +39,9 @@ shared_examples "a generator" do |generator, klass|
       do_action.should be_instance_of klass
     end
 
-    context "with options :failure_strategy =>" do
+    context "with options :failure_strategy" do
       context ":ignore" do
-        let!(:options) { {:failure_strategy => :ignore} }
+        let(:options) { {:failure_strategy => :ignore} }
 
         it "not raise exception if model#save return false" do
           instance_of(klass).save { false }
@@ -54,7 +54,7 @@ shared_examples "a generator" do |generator, klass|
       end
 
       context ":rollback" do
-        let!(:options) { {:failure_strategy => :rollback} }
+        let(:options) { {:failure_strategy => :rollback} }
 
         it "not raise exception if model#save return false" do
           instance_of(klass).save { false }
@@ -68,31 +68,24 @@ shared_examples "a generator" do |generator, klass|
     end
 
     context "with options :failure" do
-      let!(:callback){ lambda{|m|} }
-      let!(:options){ {:failure => callback} }
-      let!(:model){ klass.new }
-
-      before do
-        stub(klass).new{ model }
-      end
+      let(:row){ {:value => "Johnny"} }
+      let(:callback){ lambda{|r| self.dynamic_value = r[:value]} }
+      let(:options){ {:failure => callback} }
 
       it "should not call by default" do
-        mock(callback).call(model).never
-        do_action
+        do_action.dynamic_value.should be_nil
       end
       it "should call callback if model#save return false" do
         instance_of(klass).save { false }
-        stub(callback).call(model).once
-        do_action
+        do_action.dynamic_value.should == "Johnny"
       end
       it "should call callback if model#save raise exception" do
         instance_of(klass).save { raise "force exception!" }
-        stub(callback).call(model).once
-        do_action
+        do_action.dynamic_value.should == "Johnny"
       end
     end
 
-    context "with options" do
+    context "with callbacks" do
       let(:row){ {:value => "Flesh"} }
       let(:callback) { lambda{|row| self.first_name = row[:value]} }
 

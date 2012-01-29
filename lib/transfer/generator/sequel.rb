@@ -31,7 +31,7 @@ class Transfer::Generator::Sequel < Transfer::Generator::Base
     model.instance_exec row, &callbacks[:after_save] if callbacks[:after_save]
     model
   rescue
-    options[:failure].call(model) if options[:failure]
+    model.instance_exec row, &options[:failure] if options[:failure]
     model.instance_exec row, &callbacks[:failure] if callbacks[:failure]
     raise Sequel::Rollback if options[:failure_strategy] == :rollback
     model

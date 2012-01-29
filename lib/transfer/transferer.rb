@@ -1,5 +1,5 @@
 class Transfer::Transferer
-  attr_reader :dataset, :columns, :klass
+  attr_reader :dataset, :klass
 
   def initialize dataset, klass, &block
     @dataset = dataset
