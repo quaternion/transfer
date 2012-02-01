@@ -1,3 +1,5 @@
+require 'progressbar'
+
 class Transfer::Transferer
   attr_reader :dataset, :klass
 
