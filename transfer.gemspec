@@ -5,11 +5,11 @@ require "transfer/version"
 Gem::Specification.new do |s|
   s.name        = "transfer"
   s.version     = Transfer::VERSION
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.authors     = ["Andrew Nikolaev"]
+  s.email       = ["pkskynet@tut.by"]
+  s.homepage    = "http://github/quaternion/transfer"
+  s.summary     = %q{Transfer}
+  s.description = %q{Move data from any source database supported Sequel to model: ActiveRecord, SequelModel, Mongoid}
 
   s.rubyforge_project = "transfer"
 
