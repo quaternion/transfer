@@ -4,11 +4,11 @@ require 'spec_helper'
 shared_examples "a transfer johnny hollow" do
   let!(:user) { Fabricate :johnny_hollow }
 
-  it "created one record" do
+  it "should change count records from 0 to 1" do
     expect{ do_action }.to change{ klass.count }.from(0).to(1)
   end
 
-  describe "klass.first" do
+  describe "first record" do
     subject { klass.first }
 
     before do
@@ -75,6 +75,13 @@ shared_examples "a transfer johnny hollow" do
   end
 end
 
+shared_examples "a not transfer johnny hollow" do
+  let!(:user) { Fabricate :johnny_hollow }
+
+  it "should count not changed" do
+    expect{ do_action }.to_not change{ klass.count }
+  end
+end
 
 shared_examples "a transfer" do
   context SequelUser do
@@ -91,6 +98,22 @@ shared_examples "a transfer" do
   end
 end
 
+shared_examples "a not transfer" do
+  let!(:user) { Fabricate :johnny_hollow }
+
+  context SequelUser do
+    let!(:klass) { SequelUser }
+    it_should_behave_like "a not transfer johnny hollow"
+  end
+  context ActiveRecordUser do
+    let!(:klass) { ActiveRecordUser }
+    it_should_behave_like "a not transfer johnny hollow"
+  end
+  context MongoidUser do
+    let!(:klass) { MongoidUser }
+    it_should_behave_like "a not transfer johnny hollow"
+  end
+end
 
 shared_examples "a transfer with false validation" do
   context SequelUserWithFalseValidation do
@@ -107,30 +130,22 @@ shared_examples "a transfer with false validation" do
   end
 end
 
-
-shared_examples "a not transfer" do
+shared_examples "a not transfer with false validation" do
   let!(:user) { Fabricate :johnny_hollow }
 
-  context SequelUser do
-    let!(:klass) { SequelUser }
-    it "should not crated new record" do
-      expect{ do_action }.to_not change{ SequelUser.count }
-    end
+  context SequelUserWithFalseValidation do
+    let!(:klass) { SequelUserWithFalseValidation }
+    it_should_behave_like "a not transfer johnny hollow"
   end
-  context ActiveRecordUser do
-    let!(:klass) { ActiveRecordUser }
-    it "should not crated new record" do
-      expect{ do_action }.to_not change{ ActiveRecordUser.count }
-    end
+  context ActiveRecordUserWithFalseValidation do
+    let!(:klass) { ActiveRecordUserWithFalseValidation }
+    it_should_behave_like "a not transfer johnny hollow"
   end
-  context MongoidUser do
-    let!(:klass) { MongoidUser }
-    it "should not crated new record" do
-      expect{ do_action }.to_not change{ MongoidUser.count }
-    end
+  context MongoidUserWithFalseValidation do
+    let!(:klass) { MongoidUserWithFalseValidation }
+    it_should_behave_like "a not transfer johnny hollow"
   end
 end
-
 
 
 module Transfer

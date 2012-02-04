@@ -35,12 +35,15 @@ def transfer *args, &block
   when Hash
     transfer :default, *args, &block
   when Transfer::Config
-    raise ArgumentError.new("second argument should be Hash") unless args[1].instance_of?(Hash)
-    config = args[0]
-    args[1].each do |key, value|
+    raise ArgumentError.new("second argument should be Hash!") unless args[1].instance_of?(Hash)
+    config, options = args[0], args[1]
+    process_keys = [:validate, :failure_strategy, :failure]
+    process_options = config.process_options.merge options.select{|key| process_keys.include?(key) }
+    sources = options.select{|key| !process_keys.include?(key) }
+    sources.each do |key, value|
       dataset = config.connection[key]
       transferer = Transfer::Transferer.new dataset, value, &block
-      transferer.process config.process_options
+      transferer.process process_options
     end
   end
 

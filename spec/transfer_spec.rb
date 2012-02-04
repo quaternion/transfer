@@ -7,6 +7,9 @@ describe Transfer do
   it { should respond_to :configs }
   it { should respond_to :configure }
 
+  before do
+    Transfer.configs.clear
+  end
 
   describe ".configs" do
     subject { Transfer.configs }
@@ -17,12 +20,7 @@ describe Transfer do
     end
   end
 
-
   describe ".configure" do
-    after do
-      Transfer.configs.clear
-    end
-
     context ":default" do
       subject { Transfer.configs[:default] }
       before do
@@ -42,9 +40,7 @@ describe Transfer do
       it { should be_instance_of Transfer::Config }
       its(:host) { should == "named" }
     end
-
   end
-
 
   describe "transfer" do
     def do_action &block
@@ -56,14 +52,15 @@ describe Transfer do
     end
 
     context "with empty options" do
-      before :all do
+      before do
         Transfer.configure
       end
       it_should_behave_like "a transfer"
     end
 
+
     context "with options :validate => false" do
-      before :all do
+      before do
         Transfer.configure do |config|
           config.validate = false
         end
@@ -150,6 +147,22 @@ describe Transfer do
             do_action
             model.dynamic_value.should == "Johnny"
           end
+        end
+      end
+    end
+
+    describe "override global options" do
+      before do
+        Transfer.configure do |c|
+          c.validate = true
+          c.failure_strategy = :ignore
+        end
+        instance_of(Transfer::Transferer).process(:validate => false, :failure_strategy => :rollback).once
+      end
+
+      [SequelUser, ActiveRecordUser, MongoidUser].each do |klass|
+        it "for #{klass}" do
+          transfer :source_users => klass, :validate => false, :failure_strategy => :rollback
         end
       end
     end
