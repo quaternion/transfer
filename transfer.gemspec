@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Transfer::VERSION
   s.authors     = ["Andrew Nikolaev"]
   s.email       = ["pkskynet@tut.by"]
-  s.homepage    = "http://github/quaternion/transfer"
+  s.homepage    = "http://github.com/quaternion/transfer"
   s.summary     = "Transfer data from source database to models"
   s.description = %q{Transfer data from any source database, supported Sequel, to ActiveRecord, Sequel or Mongoid models}
 
@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency "sequel"
-  s.add_runtime_dependency "progressbar"
+  # s.add_runtime_dependency "progressbar"
 
   s.add_development_dependency "rr"
   s.add_development_dependency "fabrication"

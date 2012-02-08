@@ -1,5 +1,5 @@
 require 'spec_helper'
-
+require 'transferer_shared'
 
 describe Transfer do
   subject { Transfer }
@@ -58,7 +58,6 @@ describe Transfer do
       it_should_behave_like "a transfer"
     end
 
-
     context "with options :validate => false" do
       before do
         Transfer.configure do |config|
@@ -76,28 +75,10 @@ describe Transfer do
         end
       end
 
-      context "while olivia#save raise exception" do
+      context "while olivia#save throws an exception" do
         before do
           stub.proxy(klass).new do |model|
-            stub(model).save{ raise "force exception!" }  if model.id == olivia.id
-            model
-          end
-        end
-
-        context "with Transfer.failure_strategy = :ignore" do
-          let!(:failure_strategy) { :ignore }
-          it_should_behave_like "a transfer"
-        end
-        context "with Transfer.failure_strategy = :rollback" do
-          let!(:failure_strategy) { :rollback }
-          it_should_behave_like "a not transfer"
-        end
-      end
-
-      context "while olivia#save return false" do
-        before do
-          stub.proxy(klass).new do |model|
-            stub(model).save{ false }  if model.id == olivia.id
+            save_failure(model) if model.id == olivia.id
             model
           end
         end
@@ -125,10 +106,10 @@ describe Transfer do
       [SequelUser, ActiveRecordUser, MongoidUser].each do |c|
         context "for #{c}" do
           let!(:klass) { c }
-          let!(:model){ klass.new }
+          include_context "stub klass model"
+
           before do
             Fabricate :johnny_hollow
-            stub(klass).new{ model }
           end
 
           it "should not called callback" do
@@ -136,14 +117,8 @@ describe Transfer do
             model.dynamic_value.should be_nil
           end
 
-          it "should called callback if #save raise exception" do
-            instance_of(klass).save { raise "force exception!" }
-            do_action
-            model.dynamic_value.should == "Johnny"
-          end
-
-          it "should called callback if #save return false" do
-            instance_of(klass).save { false }
+          it "should called callback if #save throws an exception" do
+            save_failure klass
             do_action
             model.dynamic_value.should == "Johnny"
           end
@@ -157,11 +132,11 @@ describe Transfer do
           c.validate = true
           c.failure_strategy = :ignore
         end
-        instance_of(Transfer::Transferer).process(:validate => false, :failure_strategy => :rollback).once
       end
 
       [SequelUser, ActiveRecordUser, MongoidUser].each do |klass|
         it "for #{klass}" do
+          instance_of(Transfer::Transferer).process(:validate => false, :failure_strategy => :rollback).once
           transfer :source_users => klass, :validate => false, :failure_strategy => :rollback
         end
       end

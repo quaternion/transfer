@@ -1,5 +1,3 @@
-require 'progressbar'
-
 class Transfer::Transferer
   attr_reader :dataset, :klass
 
@@ -34,15 +32,12 @@ class Transfer::Transferer
 
   def process options = {}
     generator.before
-    pbar = ProgressBar.new(klass.name, dataset.count)
     generator.transaction do
       dataset.each do |row|
         attributes = build_attributes row
-        generator.create attributes, row, options, callbacks
-        pbar.inc
+        generator.create attributes, row, options.merge(callbacks)
       end
     end
-    pbar.finish
     generator.after
   end
 
@@ -77,8 +72,8 @@ class Transfer::Transferer
 
 
   def add_column key, value
-    raise ArgumentError.new("method #{key} in class #{klass} is not defined!") unless generator.column_present?(key)
-    raise ArgumentError.new("source column #{value} not exists!") if value.instance_of?(Symbol) and !dataset.columns.include?(value)
+    raise ArgumentError.new("method ##{key} in class #{klass} is not defined!") unless generator.column_present?(key)
+    raise ArgumentError.new("source column ##{value} not exists!") if value.instance_of?(Symbol) and !dataset.columns.include?(value)
     columns[key] = value
   end
 

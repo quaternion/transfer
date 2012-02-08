@@ -1,5 +1,6 @@
 require "transfer/version"
 
+
 module Transfer
   extend self
   autoload :Config, 'transfer/config'

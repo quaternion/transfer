@@ -18,18 +18,17 @@ class Transfer::Generator::ActiveRecord < Transfer::Generator::Base
     klass.transaction &block
   end
 
-  def create attributes, row, options={}, callbacks={}
+  def create attributes, row, options={}
     model = klass.new attributes, :without_protection => true
 
-    model.instance_exec row, &callbacks[:before_save] if callbacks[:before_save]
+    model.instance_exec row, &options[:before_save] if options[:before_save]
     save_options = options.select{|key| key == :validate }
 
-    raise unless model.save save_options
-    model.instance_exec row, &callbacks[:after_save] if callbacks[:after_save]
+    model.save! save_options
+    model.instance_exec row, &options[:after_save] if options[:after_save]
     model
-  rescue
-    model.instance_exec row, &options[:failure] if options[:failure]
-    model.instance_exec row, &callbacks[:failure] if callbacks[:failure]
+  rescue Exception => e
+    model.instance_exec row, e, &options[:failure] if options[:failure]
     raise ActiveRecord::Rollback if options[:failure_strategy] == :rollback
     model
   end

@@ -1,4 +1,7 @@
-shared_examples "a generator" do |generator, klass|
+require 'spec_helper'
+
+
+shared_examples "a generator" do
   subject { generator.new klass }
 
   it { should respond_to :create }
@@ -29,94 +32,73 @@ shared_examples "a generator" do |generator, klass|
     let(:attributes) {{}}
     let(:row) {{}}
     let(:options) {{}}
-    let(:callbacks) {{}}
 
     def do_action
-      subject.create attributes, row, options, callbacks
+      subject.create attributes, row, options
     end
 
-    it "should return #{klass}" do
+    it "should return correct type" do
       do_action.should be_instance_of klass
     end
 
     context "with options :failure_strategy" do
       context ":ignore" do
         let(:options) { {:failure_strategy => :ignore} }
-
-        it "not raise exception if model#save return false" do
-          instance_of(klass).save { false }
-          expect{ do_action }.to_not raise_error
-        end
-        it "not raise exception if model#save raise exception" do
-          instance_of(klass).save { raise "force exception!" }
+        it "not raise exception if model#save throws an exception" do
+          save_failure klass
           expect{ do_action }.to_not raise_error
         end
       end
 
       context ":rollback" do
         let(:options) { {:failure_strategy => :rollback} }
-
-        it "not raise exception if model#save return false" do
-          instance_of(klass).save { false }
-          expect{ do_action }.to raise_error
-        end
-        it "not raise exception if model#save raise exception" do
-          instance_of(klass).save { raise }
+        it "raise exception if model#save throws an exception" do
+          save_failure klass
           expect{ do_action }.to raise_error
         end
       end
     end
 
-    context "with options :failure" do
-      let(:row){ {:value => "Johnny"} }
-      let(:callback){ lambda{|r| self.dynamic_value = r[:value]} }
-      let(:options){ {:failure => callback} }
+    describe "callbacks" do
+      let(:row){ {:value => "flesh"} }
+      let(:callback) { lambda{|row| self.dynamic_value = row[:value]} }
 
-      it "should not call by default" do
+      it "should dynamic_value be nil" do
         do_action.dynamic_value.should be_nil
       end
-      it "should call callback if model#save return false" do
-        instance_of(klass).save { false }
-        do_action.dynamic_value.should == "Johnny"
-      end
-      it "should call callback if model#save raise exception" do
-        instance_of(klass).save { raise "force exception!" }
-        do_action.dynamic_value.should == "Johnny"
-      end
-    end
 
-    context "with callbacks" do
-      let(:row){ {:value => "Flesh"} }
-      let(:callback) { lambda{|row| self.first_name = row[:value]} }
-
-      describe ":before_save" do
-        let(:callbacks) { {:before_save => callback} }
-
-        it "should call before_save" do
-          do_action.first_name.should == "Flesh"
+      describe "before_save" do
+        let(:options) { {:before_save => callback} }
+        it "should call" do
+          do_action.dynamic_value.should == "flesh"
         end
-        it "after create" do
-          do_action
-          klass.first.first_name.should == "Flesh"
+        it "should call if #save throws an exception" do
+          save_failure klass
+          do_action.dynamic_value.should == "flesh"
         end
       end
-      describe ":after_save" do
-        let(:callbacks) { {:after_save => callback} }
-
+      describe "after_save" do
+        let(:options) { {:after_save => callback} }
         it "should call after_save" do
-          do_action.first_name.should == "Flesh"
+          do_action.dynamic_value.should == "flesh"
         end
-        it "after create" do
-          do_action
-          klass.first.first_name.should be_nil
+        it "should not call if #save throws an exception" do
+          save_failure klass
+          do_action.dynamic_value.should be_nil
         end
-        it "should not call callback if #save return false" do
-          instance_of(klass).save{ false }
-          do_action.first_name.should be_nil
+      end
+      describe "failure" do
+        let(:options){ {:failure => lambda{|row, e| self.dynamic_value = row[:value], e}} }
+        it "should not call" do
+          do_action.dynamic_value.should be_nil
         end
-        it "should not call callback if #save raise exception" do
-          instance_of(klass).save{ raise "force exception!" }
-          do_action.first_name.should be_nil
+        it "should call if #save throws an exception" do
+          save_failure klass
+          do_action.dynamic_value[0].should == "flesh"
+        end
+        it "should correct error if #save throws an exception" do
+          save_failure klass
+          do_action.dynamic_value[1].message.should == "force exception!"
         end
       end
     end
