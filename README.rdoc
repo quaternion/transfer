@@ -1,0 +1,96 @@
+== Transfer Gem
+Transfer data from source database to ActiveRecord, SequelModel or Mongoid models.
+
+=== Installation
+    gem install transfer
+or if used bundler, insert to Gemfile
+    gem 'transfer'
+
+=== Compatibility
+ActiveRecord, SequelModel, Mongoid.
+
+== Configure
+    Transfer.configure do |c|
+      c.host = "localhost"
+      c.adapter = "postgres"
+      c.database = "source_database"
+      c.user = "username"
+      c.password = "password"
+    end
+Available options:
+* +validate+ on/off model validations. Values: +true+ or +false+, default is +false+.
+* +failure_strategy+ set strategy if save of model is not successfully. Values: +:ignore+ or +:rollback+, defult is +:ignore+.
+* +failure+ global failure callback.
+* another options interpreted as Sequel database connection options, see http://sequel.rubyforge.org/rdoc/files/doc/opening_databases_rdoc.html
+
+== Usage
+Direct transfer from source table +:users+ to +User+ model. All columns, existing in source table and destination model, will transferred.
+
+    transfer :users => User
+
+If in source +:users+ table not exists column +country+, simple add it.
+
+    transfer :users => User do
+      country "England"
+    end
+
+Transfer +:name+ column from source table into +first_name+ method of User model.
+
+    transfer :users => User do
+      first_name :name
+    end
+
+To produce, dynamic value (e.g. +dist_name+), you can pass a block and access the row of source table.
+
+    transfer :users => User do
+      dist_name {|row| "Mr. #{row[:first_name]}"}
+    end
+
+=== Filters
++only+ filter passes source columns, specified in parameters.
+
+    transfer :users => User do
+      only :name
+    end
+
++except+ filter passes all source columns, except for those that are specified in the parameters:
+
+    transfer :users => User do
+      except :name
+    end
+
+=== Callbacks
+All callbacks called in model context, therefore +self+ keyword points to model.
+
+    transfer :users => User do
+      before_save do |row|
+        self.country = "Hello"
+      end
+    end
+
+Available callbacks:
+* +before_save+ called before save model. Paramaters: +row+.
+* +after_save+ called after save model. Parameters: +row+.
+* +failure+ called if save model is not successfully or save process raise exception. Parameters: +row+, +exception+.
+
+=== Global callbacks
+This callbacks analogy callbacks from +transfer+, they are invoked if +transfer+ callback not defined.
+
+    Transfer.configure do |config|
+      config.failure do |row, exception|
+        #...
+      end
+    end
+
+Available global callbacks:
+* +failure+ called if save model is not successfully. Parameters: +row+, +exception+.
+
+=== Replace global options
+Global options can be replaced model options, if it passed to +transfer+.
+
+    transfer :users => User, :validate => false, :failure_strategy => :rollback
+
+Available options for replace:
+* +validate+
+* +failure_strategy+
+* +failure+
