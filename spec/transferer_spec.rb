@@ -66,7 +66,6 @@ module Transfer
         Transferer.new dataset, klass do
           before_save do;end
           after_save do;end
-          failure do;end
         end
       end
 
@@ -75,14 +74,13 @@ module Transfer
           let!(:klass) { klass }
           its(:callbacks) { should be_include :before_save }
           its(:callbacks) { should be_include :after_save }
-          its(:callbacks) { should be_include :failure }
         end
       end
     end
 
     describe "#process" do
-      def do_action &block
-        Transferer.new(dataset, klass, &block).process(options)
+      def do_action o=options, &block
+        Transferer.new(dataset, klass, &block).process(o)
       end
 
       context "with empty options" do
@@ -99,7 +97,6 @@ module Transfer
         let!(:options) { {:validate => false} }
         it_should_behave_like "a transfer with false validation"
       end
-
 
       context "if model#save throws an exception" do
         let!(:olivia) { Fabricate :olivia_lufkin }

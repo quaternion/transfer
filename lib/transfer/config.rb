@@ -21,7 +21,7 @@ module Transfer
     end
 
     def method_missing name, *args, &block
-      /^((validate|failure_strategy|failure)|\w+)(=)?$/.match name
+      /^((validate|failure_strategy|failure|before|after|success)|\w+)(=)?$/.match name
       opt = $2 ? process_options : connection_options
       if block_given?
         opt[$1.to_sym] = block

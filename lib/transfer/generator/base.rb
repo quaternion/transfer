@@ -15,7 +15,7 @@ class Transfer::Generator::Base
   def after
   end
 
-  def create attributes, row, options={}
+  def create attributes, row, options={}, callbacks={}
     raise "Not Yet Implemented!"
   end
 

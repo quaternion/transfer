@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'transferer_shared'
 
 
 shared_examples "a generator" do
@@ -32,34 +33,37 @@ shared_examples "a generator" do
     let(:attributes) {{}}
     let(:row) {{}}
     let(:options) {{}}
+    let(:callbacks) {{}}
 
     def do_action
-      subject.create attributes, row, options
+      subject.create attributes, row, options, callbacks
     end
 
     it "should return correct type" do
       do_action.should be_instance_of klass
     end
 
-    context "with options :failure_strategy" do
-      context ":ignore" do
-        let(:options) { {:failure_strategy => :ignore} }
-        it "not raise exception if model#save throws an exception" do
-          save_failure klass
-          expect{ do_action }.to_not raise_error
+    context "with options" do
+      context "failure_strategy" do
+        describe ":ignore" do
+          let(:options) { {:failure_strategy => :ignore} }
+          it "not raise exception if model#save throws an exception" do
+            save_failure klass
+            expect{ do_action }.to_not raise_error
+          end
         end
-      end
 
-      context ":rollback" do
-        let(:options) { {:failure_strategy => :rollback} }
-        it "raise exception if model#save throws an exception" do
-          save_failure klass
-          expect{ do_action }.to raise_error
+        describe ":rollback" do
+          let(:options) { {:failure_strategy => :rollback} }
+          it "raise exception if model#save throws an exception" do
+            save_failure klass
+            expect{ do_action }.to raise_error
+          end
         end
       end
     end
 
-    describe "callbacks" do
+    context "with callbacks" do
       let(:row){ {:value => "flesh"} }
       let(:callback) { lambda{|row| self.dynamic_value = row[:value]} }
 
@@ -67,8 +71,8 @@ shared_examples "a generator" do
         do_action.dynamic_value.should be_nil
       end
 
-      describe "before_save" do
-        let(:options) { {:before_save => callback} }
+      describe ":before_save" do
+        let(:callbacks) { {:before_save => callback} }
         it "should call" do
           do_action.dynamic_value.should == "flesh"
         end
@@ -77,28 +81,14 @@ shared_examples "a generator" do
           do_action.dynamic_value.should == "flesh"
         end
       end
-      describe "after_save" do
-        let(:options) { {:after_save => callback} }
+      describe ":after_save" do
+        let(:callbacks) { {:after_save => callback} }
         it "should call after_save" do
           do_action.dynamic_value.should == "flesh"
         end
         it "should not call if #save throws an exception" do
           save_failure klass
           do_action.dynamic_value.should be_nil
-        end
-      end
-      describe "failure" do
-        let(:options){ {:failure => lambda{|row, e| self.dynamic_value = row[:value], e}} }
-        it "should not call" do
-          do_action.dynamic_value.should be_nil
-        end
-        it "should call if #save throws an exception" do
-          save_failure klass
-          do_action.dynamic_value[0].should == "flesh"
-        end
-        it "should correct error if #save throws an exception" do
-          save_failure klass
-          do_action.dynamic_value[1].message.should == "force exception!"
         end
       end
     end

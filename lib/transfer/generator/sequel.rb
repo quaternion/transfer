@@ -20,18 +20,19 @@ class Transfer::Generator::Sequel < Transfer::Generator::Base
     klass.db.transaction :savepoint => true, &block
   end
 
-  def create attributes, row, options={}
+  def create attributes, row, options={}, callbacks={}
     model = klass.new attributes
-    model.instance_exec row, &options[:before_save] if options[:before_save]
+    model.instance_exec row, &callbacks[:before_save] if callbacks[:before_save]
 
     save_options = options.select{|key| key == :validate }
     save_options[:raise_on_failure] = true
 
     model.save save_options
-    model.instance_exec row, &options[:after_save] if options[:after_save]
+    model.instance_exec row, &callbacks[:after_save] if callbacks[:after_save]
+    options[:success].call(model, row) if options[:success]
     model
   rescue Exception => e
-    model.instance_exec row, e, &options[:failure] if options[:failure]
+    options[:failure].call(model, row, e) if options[:failure]
     raise Sequel::Rollback if options[:failure_strategy] == :rollback
     model
   end

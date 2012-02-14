@@ -56,20 +56,10 @@ module Transfer
         its(:connection_options) { should_not include(:failure_strategy) }
       end
 
-      describe "#failure_callback" do
-        context "with lambda" do
-          before do
-            subject.failure = lambda{|model|}
-          end
-          its(:failure) { should be_instance_of Proc }
-          its(:process_options) { should include(:failure) }
-          its(:connection_options) { should_not include(:failure) }
-        end
-
+      describe "#failure" do
         context "with block" do
           before do
-            subject.failure do |model|
-            end
+            subject.failure {}
           end
           its(:failure) { should be_instance_of Proc }
           its(:process_options) { should include(:failure) }
@@ -77,12 +67,48 @@ module Transfer
         end
       end
 
-      describe "to connection_params" do
+      describe "#before" do
+        before do
+          subject.before {}
+        end
+        its(:before) { should be_instance_of Proc }
+        its(:process_options) { should include(:before) }
+        its(:connection_options) { should_not include(:before) }
+      end
+
+      describe "#after" do
+        before do
+          subject.after {}
+        end
+        its(:after) { should be_instance_of Proc }
+        its(:process_options) { should include(:after) }
+        its(:connection_options) { should_not include(:after) }
+      end
+
+      describe "#success" do
+        before do
+          subject.success {}
+        end
+        its(:success) { should be_instance_of Proc }
+        its(:process_options) { should include(:success) }
+        its(:connection_options) { should_not include(:success) }
+      end
+
+      describe "#other=" do
         before do
           subject.host = "localhost"
         end
         its(:host) { should == "localhost" }
         its(:connection_options) { should include(:host => "localhost") }
+        its(:process_options) { should_not include(:host) }
+      end
+
+      describe "#other &block" do
+        before do
+          subject.host {}
+        end
+        its(:host) { should be_instance_of Proc }
+        its(:connection_options) { should include(:host) }
         its(:process_options) { should_not include(:host) }
       end
     end

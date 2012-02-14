@@ -51,14 +51,14 @@ describe Transfer do
       instance_of(Transfer::Config).connection { SOURCE_DB }
     end
 
-    context "with empty options" do
+    context "with empty" do
       before do
         Transfer.configure
       end
       it_should_behave_like "a transfer"
     end
 
-    context "with options :validate => false" do
+    context "with :validate => false" do
       before do
         Transfer.configure do |config|
           config.validate = false
@@ -94,33 +94,60 @@ describe Transfer do
       end
     end
 
-    context "with Transfer.failure &block" do
+    context "with callbacks" do
+      include_context "stub klass model"
+      let!(:user) { Fabricate :johnny_hollow }
       before do
-        Transfer.configure do |c|
-          c.failure do |row|
-            self.dynamic_value = row[:fname]
-          end
+        @config = Transfer.configure do |c|
+          c.before {}
+          c.success {}
+          c.failure {}
+          c.after {}
         end
+        @dataset = @config.connection[:source_users]
       end
 
-      [SequelUser, ActiveRecordUser, MongoidUser].each do |c|
-        context "for #{c}" do
-          let!(:klass) { c }
-          include_context "stub klass model"
-
-          before do
-            Fabricate :johnny_hollow
-          end
-
-          it "should not called callback" do
+      [SequelUser, ActiveRecordUser, MongoidUser].each do |klass|
+        context klass do
+          let!(:klass) { klass }
+          it "should call before" do
+            stub(@config.before).call(klass, @dataset).once
             do_action
-            model.dynamic_value.should be_nil
           end
-
-          it "should called callback if #save throws an exception" do
-            save_failure klass
+          it "should call after" do
+            stub(@config.after).call(klass, @dataset).once
             do_action
-            model.dynamic_value.should == "Johnny"
+          end
+          it "should call success" do
+            stub(@config.success).call(model, user.values).once
+            do_action
+          end
+          it "should not call failure" do
+            stub(@config.failure).call.never
+            do_action
+          end
+          context "if save failure" do
+            let!(:exception) { RuntimeError.new }
+            before do
+              save_failure klass
+              stub(RuntimeError).new { exception }
+            end
+            it "should call before" do
+              stub(@config.before).call(klass, @dataset).once
+              do_action
+            end
+            it "should call after" do
+              stub(@config.after).call(klass, @dataset).once
+              do_action
+            end
+            it "should not call success" do
+              stub(@config.success).call.never
+              do_action
+            end
+            it "should call failure" do
+              stub(@config.failure).call(model, user.values, exception).once
+              do_action
+            end
           end
         end
       end

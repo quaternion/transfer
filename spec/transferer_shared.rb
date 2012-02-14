@@ -52,6 +52,14 @@ shared_examples "a transfer johnny hollow" do
         save_failure klass
       end
 
+      it "should call before_save" do
+        do_action do
+          before_save do |row|
+            self.dynamic_value = row[:fname]
+          end
+        end
+        model.dynamic_value == "Johnny"
+      end
       it "should not call after_save" do
         do_action do
           after_save do |row|
@@ -60,22 +68,7 @@ shared_examples "a transfer johnny hollow" do
         end
         model.dynamic_value.should be_nil
       end
-      it "should called failure callback" do
-        do_action do
-          failure do |row|
-            self.dynamic_value = row[:fname]
-          end
-        end
-        model.dynamic_value.should == "Johnny"
-      end
-      it "should pass correct exception to failure callback" do
-        do_action do
-          failure do |row, exception|
-            self.dynamic_value = exception
-          end
-        end
-        model.dynamic_value.message.should == "force exception!"
-      end
+
     end
   end
 end

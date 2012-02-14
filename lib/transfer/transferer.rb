@@ -32,12 +32,14 @@ class Transfer::Transferer
 
   def process options = {}
     generator.before
+    options[:before].call(klass, dataset) if options[:before]
     generator.transaction do
       dataset.each do |row|
         attributes = build_attributes row
-        generator.create attributes, row, options.merge(callbacks)
+        generator.create attributes, row, options, callbacks
       end
     end
+    options[:after].call(klass, dataset) if options[:after]
     generator.after
   end
 
@@ -53,9 +55,9 @@ class Transfer::Transferer
     callbacks[:after_save] = block
   end
 
-  def failure &block
-    callbacks[:failure] = block
-  end
+  # def failure &block
+    # callbacks[:failure] = block
+  # end
 
   def generator
     @generator ||= GENERATORS.detect{|g| g.supports? klass}.new klass
