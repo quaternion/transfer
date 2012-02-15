@@ -2,10 +2,15 @@
 Transfer data from source database to ActiveRecord, SequelModel or Mongoid models.
 
 ### Installation
-    gem install transfer
-or if used bundler, insert to Gemfile
-    gem 'transfer'
 
+```console
+gem install transfer
+```
+or if used bundler, insert to Gemfile
+
+```ruby
+gem 'transfer'
+```
 
 ### Compatibility
 Source database: all, supported by [Sequel](http://sequel.rubyforge.org/documentation.html).
@@ -16,13 +21,15 @@ Destination: *ActiveRecord*, *SequelModel*, *Mongoid*.
 ## Configure
 Set connection options of source database and global parameters.
 
-    Transfer.configure do |c|
-      c.host = "localhost"
-      c.adapter = "postgres"
-      c.database = "source_database"
-      c.user = "username"
-      c.password = "password"
-    end
+```ruby
+Transfer.configure do |c|
+  c.host = "localhost"
+  c.adapter = "postgres"
+  c.database = "source_database"
+  c.user = "username"
+  c.password = "password"
+end
+```
 
 Available options:
 
@@ -38,45 +45,51 @@ Available options:
 ## Usage
 Direct transfer from source table `:users` to `User` model. All columns, existing in source table and destination model, will transferred.
 
-    transfer :users => User
+```ruby
+transfer :users => User
+```
 
 If in source `:users` table not exists column `country`, simple add it.
 
-    transfer :users => User do
-      country "England"
-    end
-
+```ruby
+transfer :users => User do
+  country "England"
+end
+```
 Transfer `:name` column from source table into `first_name` method of User model.
 
-    transfer :users => User do
-      first_name :name
-    end
-
+```ruby
+transfer :users => User do
+  first_name :name
+end
+```
 To produce, dynamic value (e.g. `dist_name`), you can pass a block and access the row of source table.
 
-    transfer :users => User do
-      dist_name {|row| "Mr. #{row[:first_name]}"}
-    end
-
+```ruby
+transfer :users => User do
+  dist_name {|row| "Mr. #{row[:first_name]}"}
+end
+```
 
 ### Global callbacks <a name="global_callbacks"/>
 This callbacks called for each `transfer`.
 
-    Transfer.configure do |c|
-      c.before do |klass, dataset|
-        #...
-      end
-      c.success do |model, row|
-        #...
-      end
-      c.failure do |model, row, exception|
-        #...
-      end
-      c.after do |klass, dataset|
-        #...
-      end
-    end
-
+```ruby
+Transfer.configure do |c|
+  c.before do |klass, dataset|
+    #...
+  end
+  c.success do |model, row|
+    #...
+  end
+  c.failure do |model, row, exception|
+    #...
+  end
+  c.after do |klass, dataset|
+    #...
+  end
+end
+```
 Available global callbacks:
 
 * `before` called before an transfer started. Parameters: `klass`, `dataset`.
@@ -97,12 +110,13 @@ Description of parameters:
 This called for
 This callbacks called in model context, therefore `self` keyword points to model.
 
-    transfer :users => User do
-      before_save do |row|
-        self.messages << Message.build(:title => "Transfer", :description => "Welcome to new site, #{row[:fname]}!")
-      end
-    end
-
+```ruby
+transfer :users => User do
+  before_save do |row|
+    self.messages << Message.build(:title => "Transfer", :description => "Welcome to new site, #{row[:fname]}!")
+  end
+end
+```
 Available callbacks:
 
 * `before_save` called before save model. Paramaters: `row`.
@@ -114,22 +128,26 @@ where `row` is row of source table, type: `Hash`.
 ### Filter columns
 `only` filter passes source columns, specified in parameters.
 
-    transfer :users => User do
-      only :name
-    end
-
+```ruby
+transfer :users => User do
+  only :name
+end
+```
 `except` filter passes all source columns, except for those that are specified in the parameters:
 
-    transfer :users => User do
-      except :name
-    end
+```ruby
+transfer :users => User do
+  except :name
+end
+```
 
 
 ### Replace global options
 Global options can be replaced global options, if it passed to `transfer`.
 
-    transfer :users => User, :validate => false, :failure_strategy => :rollback
-
+```ruby
+transfer :users => User, :validate => false, :failure_strategy => :rollback
+```
 Available options for replace:
 
 * `validate`
@@ -139,13 +157,15 @@ Available options for replace:
 ### Integrate with [progressbar](https://github.com/peleteiro/progressbar)
 If you also want see progress of transfer in console, use e.g. progressbar gem.
 
-    require 'progressbar'
+```ruby
+require 'progressbar'
 
-    Transfer.configure do |c|
-      c.before {|klass, dataset| @pbar = ProgressBar.new(klass, dataset.count) }
-      c.success { @pbar.inc }
-      c.failure { @pbar.halt }
-      c.after { @pbar.finish }
-    end
+Transfer.configure do |c|
+  c.before {|klass, dataset| @pbar = ProgressBar.new(klass, dataset.count) }
+  c.success { @pbar.inc }
+  c.failure { @pbar.halt }
+  c.after { @pbar.finish }
+end
 
-    transfer :users => User
+transfer :users => User
+```
