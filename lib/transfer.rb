@@ -22,7 +22,6 @@ module Transfer
   def configs
     @configs ||= Hash.new {|hash, key| raise "config #{key} not exists" }
   end
-
 end
 
 
@@ -38,7 +37,7 @@ def transfer *args, &block
   when Transfer::Config
     raise ArgumentError.new("second argument should be Hash!") unless args[1].instance_of?(Hash)
     config, options = args[0], args[1]
-    process_keys = [:validate, :failure_strategy, :failure]
+    process_keys = [:validate, :failure_strategy]
     process_options = config.process_options.merge options.select{|key| process_keys.include?(key) }
     sources = options.select{|key| !process_keys.include?(key) }
     sources.each do |key, value|
