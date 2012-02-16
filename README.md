@@ -163,8 +163,7 @@ require 'progressbar'
 Transfer.configure do |c|
   c.before {|klass, dataset| @pbar = ProgressBar.new(klass, dataset.count) }
   c.success { @pbar.inc }
-  c.failure { @pbar.halt }
-  c.after { @pbar.finish }
+  c.after { @pbar.halt }
 end
 
 transfer :users => User
