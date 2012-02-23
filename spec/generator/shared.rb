@@ -43,56 +43,23 @@ shared_examples "a generator" do
       do_action.should be_instance_of klass
     end
 
-    context "with options" do
-      context "failure_strategy" do
-        describe ":ignore" do
-          let(:options) { {:failure_strategy => :ignore} }
-          it "not raise exception if model#save throws an exception" do
-            save_failure klass
-            expect{ do_action }.to_not raise_error
-          end
+    context "with #save throws an exception" do
+      before do
+        save_failure klass
+      end
+      context ":failure_startegy=>:ignore" do
+        let(:options) { {:failure_strategy => :ignore} }
+        it "not raise exception" do
+          expect{ do_action }.to_not raise_error
         end
-
-        describe ":rollback" do
-          let(:options) { {:failure_strategy => :rollback} }
-          it "raise exception if model#save throws an exception" do
-            save_failure klass
-            expect{ do_action }.to raise_error
-          end
+      end
+      context ":failure_startegy=>:ignore" do
+        let(:options) { {:failure_strategy => :rollback} }
+        it "raise exception" do
+          expect{ do_action }.to raise_error
         end
       end
     end
-
-    context "with callbacks" do
-      let(:row){ {:value => "flesh"} }
-      let(:callback) { lambda{|row| self.dynamic_value = row[:value]} }
-
-      it "should dynamic_value be nil" do
-        do_action.dynamic_value.should be_nil
-      end
-
-      describe ":before_save" do
-        let(:callbacks) { {:before_save => callback} }
-        it "should call" do
-          do_action.dynamic_value.should == "flesh"
-        end
-        it "should call if #save throws an exception" do
-          save_failure klass
-          do_action.dynamic_value.should == "flesh"
-        end
-      end
-      describe ":after_save" do
-        let(:callbacks) { {:after_save => callback} }
-        it "should call after_save" do
-          do_action.dynamic_value.should == "flesh"
-        end
-        it "should not call if #save throws an exception" do
-          save_failure klass
-          do_action.dynamic_value.should be_nil
-        end
-      end
-    end
-
   end
 
 end
