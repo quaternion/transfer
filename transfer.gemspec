@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency "sequel"
-  # s.add_runtime_dependency "progressbar"
 
   s.add_development_dependency "rr"
   s.add_development_dependency "fabrication"
@@ -28,6 +27,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency "activerecord"
   s.add_development_dependency "mongoid"
   s.add_development_dependency "database_cleaner"
-  s.add_development_dependency "bson_ext"
-  s.add_development_dependency "ruby-debug-ide19"
 end
