@@ -2,11 +2,9 @@ require 'rspec'
 require 'rr'
 require 'fabrication'
 require 'transfer'
-require 'support/source'
-require 'support/sequel'
-require 'support/active_record'
-require 'support/mongoid'
 require 'database_cleaner'
+
+Dir["./spec/support/**/*.rb"].each {|f| require f}
 
 module TransfererHelper
   def save_failure entity

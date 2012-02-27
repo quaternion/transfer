@@ -66,10 +66,10 @@ class Transfer::Transferer
   private
 
   GENERATORS = [
-    Transfer::Generator::Sequel,
-    Transfer::Generator::ActiveRecord,
-    Transfer::Generator::Mongoid,
-    Transfer::Generator::Base
+    Transfer::Generators::Sequel,
+    Transfer::Generators::ActiveRecord,
+    Transfer::Generators::Mongoid,
+    Transfer::Generators::Base
   ]
 
 

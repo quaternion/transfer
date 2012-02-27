@@ -6,11 +6,11 @@ module Transfer
   autoload :Config, 'transfer/config'
   autoload :Transferer, 'transfer/transferer'
 
-  module Generator
-    autoload :Sequel, 'transfer/generator/sequel'
-    autoload :ActiveRecord, 'transfer/generator/active_record'
-    autoload :Mongoid, 'transfer/generator/mongoid'
-    autoload :Base, 'transfer/generator/base'
+  module Generators
+    autoload :Sequel, 'transfer/generators/sequel'
+    autoload :ActiveRecord, 'transfer/generators/active_record'
+    autoload :Mongoid, 'transfer/generators/mongoid'
+    autoload :Base, 'transfer/generators/base'
   end
 
   def configure name = :default, &block

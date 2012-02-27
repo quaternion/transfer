@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'transferer_shared'
+
 
 module Transfer
   describe Transferer do
@@ -47,17 +47,17 @@ module Transfer
     describe "#generator" do
       subject { Transferer.new(dataset, @klass).generator }
 
-      it Generator::Sequel do
+      it Generators::Sequel do
         @klass = SequelUser
-        should be_instance_of Generator::Sequel
+        should be_instance_of Generators::Sequel
       end
-      it Generator::ActiveRecord do
+      it Generators::ActiveRecord do
         @klass = ActiveRecordUser
-        should be_instance_of Generator::ActiveRecord
+        should be_instance_of Generators::ActiveRecord
       end
-      it Generator::Mongoid do
+      it Generators::Mongoid do
         @klass = MongoidUser
-        should be_instance_of Generator::Mongoid
+        should be_instance_of Generators::Mongoid
       end
     end
 

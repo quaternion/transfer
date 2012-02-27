@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'transferer_shared'
 
 
 shared_examples "a generator" do

@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'transferer_shared'
+
 
 describe Transfer do
   subject { Transfer }

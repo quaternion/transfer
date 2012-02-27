@@ -1,4 +1,4 @@
-class Transfer::Generator::Mongoid < Transfer::Generator::Base
+class Transfer::Generators::Mongoid < Transfer::Generators::Base
 
   def self.supports? klass
     defined?(Mongoid) && klass.ancestors.include?(Mongoid::Document)

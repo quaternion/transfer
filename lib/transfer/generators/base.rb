@@ -1,4 +1,4 @@
-class Transfer::Generator::Base
+class Transfer::Generators::Base
   attr_accessor :klass
 
   def self.supports? klass

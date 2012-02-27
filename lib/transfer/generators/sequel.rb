@@ -1,36 +1,39 @@
-class Transfer::Generator::ActiveRecord < Transfer::Generator::Base
+class Transfer::Generators::Sequel < Transfer::Generators::Base
 
   def self.supports? klass
-    defined?(ActiveRecord) && klass.ancestors.include?(ActiveRecord::Base)
+    defined?(Sequel) && klass.ancestors.include?(Sequel::Model)
   end
 
   def before
+    klass.unrestrict_primary_key
   end
 
   def after
+    klass.restrict_primary_key
   end
 
   def column_present? name
-    super(name) || klass.column_names.include?(name.to_s)
+    super name || klass.columns.include?(name.to_sym)
   end
 
   def transaction &block
-    klass.transaction &block
+    klass.db.transaction :savepoint => true, &block
   end
 
   def create attributes, row, options={}, callbacks={}
-    model = klass.new attributes, :without_protection => true
-
+    model = klass.new attributes
     model.instance_exec row, &callbacks[:before_save] if callbacks[:before_save]
-    save_options = options.select{|key| key == :validate }
 
-    model.save! save_options
-    options[:success].call(model, row) if options[:success]
+    save_options = options.select{|key| key == :validate }
+    save_options[:raise_on_failure] = true
+
+    model.save save_options
     model.instance_exec row, &callbacks[:after_save] if callbacks[:after_save]
+    options[:success].call(model, row) if options[:success]
     model
   rescue Exception => e
     options[:failure].call(model, row, e) if options[:failure]
-    raise ActiveRecord::Rollback if options[:failure_strategy] == :rollback
+    raise Sequel::Rollback if options[:failure_strategy] == :rollback
     model
   end
 
