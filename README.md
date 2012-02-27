@@ -2,15 +2,18 @@
 Transfer data from source database to ActiveRecord, SequelModel or Mongoid models.
 
 ### Installation
-
-```console
-gem install transfer
-```
-or if used bundler, insert to Gemfile
+Include Transfer in Gemfile:
 
 ```ruby
 gem 'transfer'
 ```
+
+You can run bundle from command line:
+
+```console
+bundle install
+```
+
 
 ### Compatibility
 Source database: all, supported by [Sequel](http://sequel.rubyforge.org/documentation.html).
@@ -19,7 +22,7 @@ Destination: *ActiveRecord*, *SequelModel*, *Mongoid*.
 
 
 ## Configure
-Set connection options of source database and global parameters.
+Set connection options of source database and global parameters:
 
 ```ruby
 Transfer.configure do |c|
@@ -43,27 +46,27 @@ Available options:
 
 
 ## Usage
-Direct transfer from source table `:users` to `User` model. All columns, existing in source table and destination model, will transferred.
+Direct transfer from source table `:users` to `User` model. All columns, existing in source table and destination model, will transferred:
 
 ```ruby
 transfer :users => User
 ```
 
-If in source `:users` table not exists column `country`, simple add it.
+Filling the field `country` a constant value:
 
 ```ruby
 transfer :users => User do
   country "England"
 end
 ```
-Transfer `:name` column from source table into `first_name` method of User model.
+Transfer `:name` column from source table `users` into `first_name` of `User` model:
 
 ```ruby
 transfer :users => User do
   first_name :name
 end
 ```
-To produce, dynamic value (e.g. `dist_name`), you can pass a block and access the row of source table.
+To produce, dynamic value (e.g. `dist_name` field), you can pass a block and access the row of source table:
 
 ```ruby
 transfer :users => User do
@@ -107,7 +110,6 @@ Description of parameters:
 
 
 ### Local transfer callbacks
-This called for
 This callbacks called in model context, therefore `self` keyword points to model.
 
 ```ruby
