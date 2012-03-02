@@ -18,7 +18,7 @@ bundle install
 ### Compatibility
 Source database: all, supported by [Sequel](http://sequel.rubyforge.org/documentation.html).
 
-Destination: *ActiveRecord*, *SequelModel*, *Mongoid*.
+Destination: ActiveRecord, SequelModel, Mongoid.
 
 
 ## Configure
@@ -46,7 +46,7 @@ Available options:
 
 
 ## Usage
-Direct transfer from source table `:users` to `User` model. All columns, existing in source table and destination model, will transferred:
+Direct transfer from source table `:users` to `User` model. All columns, including protected, existing in source table and destination model, will transferred:
 
 ```ruby
 transfer :users => User
@@ -59,7 +59,7 @@ transfer :users => User do
   country "England"
 end
 ```
-Transfer `:name` column from source table `users` into `first_name` of `User` model:
+Transfer `:name` column from source table `:users` into `first_name` of `User` model:
 
 ```ruby
 transfer :users => User do
@@ -110,7 +110,7 @@ Description of parameters:
 
 
 ### Local transfer callbacks
-This callbacks called in model context, therefore `self` keyword points to model.
+You can specify callbacks in your `transfer` that are separate from the model callbacks. This callbacks called in model context, therefore `self` keyword points to model.
 
 ```ruby
 transfer :users => User do
@@ -122,7 +122,7 @@ end
 Available callbacks:
 
 * `before_save` called before save model. Paramaters: `row`.
-* `after_save` called after save model. Parameters: `row`.
+* `after_save` called after successfully save model. Parameters: `row`.
 
 where `row` is row of source table, type: `Hash`.
 
@@ -156,8 +156,8 @@ Available options for replace:
 * `failure_strategy`
 
 
-### Integrate with [progressbar](https://github.com/peleteiro/progressbar)
-If you also want see progress of transfer in console, use e.g. progressbar gem.
+### Logging
+If you also want see progress of transfer in console, use e.g. [progressbar gem](https://github.com/peleteiro/progressbar) with global callbacks.
 
 ```ruby
 require 'progressbar'

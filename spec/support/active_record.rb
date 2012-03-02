@@ -11,6 +11,7 @@ class ActiveRecordUserMigration < ActiveRecord::Migration
       t.string :last_name
       t.string :full_name
       t.string :before_save_value
+      t.string :protected_value
     end
   end
 
@@ -25,11 +26,14 @@ ActiveRecordUserMigration.up
 class ActiveRecordUser < ActiveRecord::Base
   set_table_name "active_record_users"
   attr_accessor :dynamic_value
+  attr_protected :protected_value
 end
 
 class ActiveRecordUserWithFalseValidation < ActiveRecord::Base
   set_table_name "active_record_users"
   attr_accessor :dynamic_value
+  attr_protected :protected_value
+
   validate :fake
 
   def fake

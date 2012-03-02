@@ -15,6 +15,7 @@ shared_examples "a transfer johnny hollow" do
         first_name :fname
         last_name  :lname
         full_name  {|r| "#{r[:fname]} #{r[:lname]}" }
+        protected_value "flash"
       end
     end
 
@@ -23,6 +24,7 @@ shared_examples "a transfer johnny hollow" do
     its(:first_name) { should == "Johnny" }
     its(:last_name) { should == "Hollow" }
     its(:full_name) { should == "Johnny Hollow" }
+    its(:protected_value) { should == "flash" }
   end
 
   describe "callbacks" do
