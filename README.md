@@ -145,7 +145,7 @@ end
 
 
 ### Replace global options
-Global options can be replaced global options, if it passed to `transfer`.
+Global options can be replaced, if it passed to `transfer`.
 
 ```ruby
 transfer :users => User, :validate => false, :failure_strategy => :rollback
@@ -163,7 +163,7 @@ If you also want see progress of transfer in console, use e.g. [progressbar gem]
 require 'progressbar'
 
 Transfer.configure do |c|
-  c.before {|klass, dataset| @pbar = ProgressBar.new(klass, dataset.count) }
+  c.before {|klass, dataset| @pbar = ProgressBar.new(klass.to_s, dataset.count) }
   c.success { @pbar.inc }
   c.after { @pbar.halt }
 end
