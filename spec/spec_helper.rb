@@ -25,12 +25,8 @@ RSpec.configure do |c|
   c.before :suite do
     DatabaseCleaner[:mongoid].strategy = :truncation
     DatabaseCleaner[:active_record].strategy = :transaction
-  end
-
-  c.around do |example|
-    Sequel.transaction Sequel::DATABASES, :rollback => :always do
-      example.run
-    end
+    DatabaseCleaner[:sequel, {:connection => SOURCE_DB} ].strategy = :transaction
+    DatabaseCleaner[:sequel, {:connection => DESTINATION_DB} ].strategy = :transaction
   end
 
   c.before :each do
