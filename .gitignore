@@ -1,0 +1,8 @@
+*.gem
+.bundle
+pkg/*
+.yardoc/*
+Gemfile.lock
+
+## Eclipse
+.project
